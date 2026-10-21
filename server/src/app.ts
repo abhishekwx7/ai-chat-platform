@@ -4,6 +4,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
 
 import conversationRoutes from "./routes/conversation.routes.js";
+import messageRoutes from "./routes/message.route.js";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use("/api/conversations", conversationRoutes);
+app.use("/api/conversations/:conversationId/messages", messageRoutes);
 
 //Health Check
 app.get("/api/health", (_req, res) => {
