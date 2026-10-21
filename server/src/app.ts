@@ -3,6 +3,8 @@ import cors from "cors"
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
 
+import conversationRoutes from "./routes/conversation.routes.js";
+
 const app = express();
 
 // Better Auth routes
@@ -18,6 +20,8 @@ app.use(cors({
 
 // JSON Body Parser
 app.use(express.json());
+
+app.use("/api/conversations", conversationRoutes);
 
 //Health Check
 app.get("/api/health", (_req, res) => {
