@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { createMessageSchema } from "../validators/message.schema.js";
-import { createMessage, getMessages } from "../services/message.service.js";
+import { createMessage, getMessages, streamMessages } from "../services/message.service.js";
+
 
 export async function createMessageController(
     req: Request,
@@ -55,4 +56,26 @@ export async function getMessagesController(
         message: "Messages fetched successfully!",
         messages,
     });
+}
+
+export async function streamMessageController(req: Request, res: Response) {
+    const userId = res.locals.user.id;
+    const conversationId = req.params.conversationId as string;
+
+    const parsed = createMessageSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+        return res.status(400).json({
+            message: "Invalid message data",
+            errors: parsed.error.flatten(),
+        });
+    }
+
+    const result = await streamMessages(conversationId, userId, parsed.data.content, res);
+
+    if (!result && !res.headersSent) {
+        return res.status(404).json({
+            message: "Conversation not found",
+        });
+    }
 }

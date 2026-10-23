@@ -2,7 +2,7 @@ import "dotenv/config";
 import { generateAIResponse } from "./src/services/ai.service.js";
 
 async function main() {
-    const answer = await generateAIResponse("Explain Applied AI in two sentences.");
+    const answer = await generateAIResponse({});
 
     console.log("AI RESPONSE : ", answer);
 }
