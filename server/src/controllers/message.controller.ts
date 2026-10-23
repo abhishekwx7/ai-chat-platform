@@ -18,21 +18,21 @@ export async function createMessageController(
         });
     }
 
-    const message = await createMessage(
+    const result = await createMessage(
         conversationId,
         userId,
         parsed.data.content
     );
 
-    if (!message) {
+    if (!result) {
         return res.status(404).json({
             message: "Conversation not found",
         });
     }
 
     return res.status(201).json({
-        message: "Message created successfully",
-        data: message,
+        message: "Message created and AI response generated",
+        data: result,
     });
 }
 

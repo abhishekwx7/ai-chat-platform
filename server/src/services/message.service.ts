@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { generateAIResponse } from "./ai.service.js";
 
 export async function createMessage(conversationId: string, userId: string, content: string) {
     const conversation = await prisma.conversation.findFirst({
@@ -6,13 +7,17 @@ export async function createMessage(conversationId: string, userId: string, cont
             id: conversationId,
             userId,
         },
+        select: {
+            id: true,
+        }
     });
 
     if (!conversation) {
         return null;
     }
 
-    const message = await prisma.message.create({
+    // 2. Save the new user message
+    const userMessage = await prisma.message.create({
         data: {
             content,
             role: "USER",
@@ -20,7 +25,39 @@ export async function createMessage(conversationId: string, userId: string, cont
         },
     });
 
-    return message;
+    // 3. Fetch the conversation history
+    const history = await prisma.message.findMany({
+        where: {
+            conversationId,
+        },
+        orderBy: [
+            { createdAt: "asc" },
+            { id: "asc" },
+        ],
+    });
+
+    // 4. Convert database messages into OpenAI format
+    const messages = history.map((message) => ({
+        role: message.role == "USER" ? "user" as const : "assistant" as const,
+        content: message.content,
+    }));
+
+    // 5. Generate response using conversation history
+    const aiResponse = await generateAIResponse(messages);
+
+    // 6. Save assistant response
+    const assistantMessage = await prisma.message.create({
+        data: {
+            content: aiResponse,
+            role: "ASSISTANT",
+            conversationId,
+        },
+    });
+
+    return {
+        userMessage,
+        assistantMessage,
+    }
 }
 
 export async function getMessages(conversationId: string, userId: string) {
