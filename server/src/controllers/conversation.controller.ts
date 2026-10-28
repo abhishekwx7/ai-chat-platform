@@ -18,7 +18,7 @@ export async function getConversationsController(_req: Request, res: Response) {
 
     const conversations = await getConversations(userId);
 
-    res.status(201).json({
+    res.status(200).json({
         conversations,
     })
 }
