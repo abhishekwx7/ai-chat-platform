@@ -14,6 +14,10 @@ interface CreateConversationResponse {
 }
 
 export async function createConversation(): Promise<Conversation> {
+    console.log(
+        "✅ Sending API request:",
+        `${API_BASE_URL}/api/conversations`
+    );
     const response = await fetch(`${API_BASE_URL}/api/conversations`, {
         method: "POST",
         credentials: "include",
@@ -21,6 +25,8 @@ export async function createConversation(): Promise<Conversation> {
             Accept: "application/json",
         },
     });
+
+    console.log("✅ API response status:", response.status);
 
     if (!response.ok) {
         throw new Error(`Failed to create conversation : ${response.status}`)

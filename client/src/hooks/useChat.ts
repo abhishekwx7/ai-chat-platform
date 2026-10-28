@@ -17,11 +17,19 @@ export function useChat() {
     const isSendingRef = useRef(false);
 
     const sendMessage = async (content: string): Promise<void> => {
+        console.log("✅ sendMessage called:", content);
+
         const trimmedContent = content.trim();
 
-        if (!trimmedContent || !isSendingRef.current) {
+        console.log("Content:", trimmedContent);
+        console.log("isSendingRef:", isSendingRef.current);
+
+        if (!trimmedContent || isSendingRef.current) {
+            console.log("❌ Request blocked by guard condition");
             return;
         }
+
+        console.log("✅ Passed guard condition");
 
         isSendingRef.current = true;
         setIsStreaming(true);
@@ -35,7 +43,11 @@ export function useChat() {
 
             // Create a conversation if one does not exist.
             if (!activeConversationId) {
+                console.log("✅ Creating new conversation");
+
                 const conversation = await createConversation();
+
+                console.log("✅ Conversation created:", conversation);
 
                 activeConversationId = conversation.id;
                 conversationIdRef.current = conversation.id;
@@ -88,6 +100,7 @@ export function useChat() {
                 },
             })
         } catch (err) {
+            console.log("console error:", err);
             if (controller.signal.aborted) {
                 return;
             }
