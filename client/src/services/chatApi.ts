@@ -38,8 +38,16 @@ export async function streamMessage({
         signal,
     });
 
+    if (response.status === 401) {
+        throw new Error("Session expired. Please sign in again.");
+    }
+
+    if (response.status === 403) {
+        throw new Error("You don't have access to this conversation.");
+    }
+
     if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
+        throw new Error(`Streaming request failed: ${response.status}`);
     }
 
     if (!response.body) {

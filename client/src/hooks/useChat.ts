@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { API_BASE_URL } from "../config/api";
 import { createConversation } from "../services/conversationApi";
 import { streamMessage, type ChatMessage } from "../services/chatApi";
@@ -45,7 +45,9 @@ export function useChat() {
             if (!activeConversationId) {
                 console.log("✅ Creating new conversation");
 
-                const conversation = await createConversation();
+                const conversation = await createConversation(controller.signal);
+
+                if (controller.signal.aborted) return;
 
                 console.log("✅ Conversation created:", conversation);
 
@@ -89,6 +91,8 @@ export function useChat() {
                 },
 
                 onDelta: (text) => {
+                    if (controller.signal.aborted) return;
+
                     setMessages((previous) => previous.map((message) => message.id === assistantMessageId ? {
                         ...message,
                         content: message.content + text,
@@ -96,6 +100,8 @@ export function useChat() {
                 },
 
                 onDone: (savedMessage) => {
+                    if (controller.signal.aborted) return;
+
                     setMessages((previous) => previous.map((message) => message.id === assistantMessageId ? savedMessage : message));
                 },
             })
@@ -118,8 +124,26 @@ export function useChat() {
     };
 
     const stopStreaming = (): void => {
-        abortControllerRef.current?.abort();
-    }
+        const controller = abortControllerRef.current;
+
+        if (!controller) return;
+
+        controller.abort();
+
+        setMessages((previous) =>
+            previous.filter(
+                (message) =>
+                    message.role !== "ASSISTANT" ||
+                    message.content !== ""
+            )
+        );
+    };
+
+    useEffect(() => {
+        return () => {
+            abortControllerRef.current?.abort();
+        };
+    }, []);
 
     return {
         conversationId,

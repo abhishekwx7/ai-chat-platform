@@ -102,7 +102,7 @@ function Chat() {
           >
             <div
               className={`max-w-[80%] whitespace-pre-wrap 
-                break-words rounded-2xl px-4 py-3 ${message.role === "USER" ? "bg-[#30343D]" : "bg-[#242830]"}`}
+                wrap-break-word rounded-2xl px-4 py-3 ${message.role === "USER" ? "bg-[#30343D]" : "bg-[#242830]"}`}
             >
               {message.content || (
                 <span className="animate-pulse text-gray-400">Thinking...</span>

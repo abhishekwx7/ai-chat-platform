@@ -13,26 +13,33 @@ interface CreateConversationResponse {
     conversation: Conversation;
 }
 
-export async function createConversation(): Promise<Conversation> {
-    console.log(
-        "✅ Sending API request:",
-        `${API_BASE_URL}/api/conversations`
+export async function createConversation(
+    signal?: AbortSignal
+): Promise<Conversation> {
+    const response = await fetch(
+        `${API_BASE_URL}/api/conversations`,
+        {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                Accept: "application/json",
+            },
+            signal,
+        }
     );
-    const response = await fetch(`${API_BASE_URL}/api/conversations`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-            Accept: "application/json",
-        },
-    });
 
-    console.log("✅ API response status:", response.status);
-
-    if (!response.ok) {
-        throw new Error(`Failed to create conversation : ${response.status}`)
+    if (response.status === 401) {
+        throw new Error("Session expired. Please sign in again.");
     }
 
-    const data: CreateConversationResponse = await response.json();
+    if (!response.ok) {
+        throw new Error(
+            `Failed to create conversation: ${response.status}`
+        );
+    }
+
+    const data: CreateConversationResponse =
+        await response.json();
 
     return data.conversation;
 }
