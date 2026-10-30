@@ -8,15 +8,14 @@ import messageRoutes from "./routes/message.route.js";
 
 const app = express();
 
-// Better Auth routes
-app.all("/api/auth/*splat", toNodeHandler(auth));
-
-
 // CORS Configuration
 app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
 }));
+
+// Better Auth routes
+app.all("/api/auth/*splat", toNodeHandler(auth));
 
 
 // JSON Body Parser

@@ -1,5 +1,6 @@
 import { useState, type SubmitEvent } from "react";
 import { authClient } from "../auth-client";
+import { useNavigate } from "react-router-dom";
 
 function SignUp() {
   const [name, setName] = useState("");
@@ -8,6 +9,8 @@ function SignUp() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,6 +30,8 @@ function SignUp() {
       }
 
       console.log("Account Created: ", data);
+
+      navigate("/signin", { replace: true });
     } catch {
       setError("Something went wrong! Please try again.");
     } finally {

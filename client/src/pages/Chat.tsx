@@ -1,5 +1,7 @@
 import { useState, type SubmitEvent } from "react";
 import { useChat } from "../hooks/useChat";
+import { useNavigate } from "react-router-dom";
+import { authClient } from "../auth-client";
 import "../App.css";
 
 function Chat() {
@@ -33,16 +35,54 @@ function Chat() {
     void sendMessage(content);
   };
 
+  const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    try {
+      const { error } = await authClient.signOut();
+
+      if (error) {
+        console.error("Logout failed:", error.message);
+        return;
+      }
+
+      stopStreaming();
+      navigate("/signin", { replace: true });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-[#191C22] text-white">
       {/* Header */}
-      <header className="border-b border-gray-700 px-6 py-4">
-        <h1 className="text-xl font-semibold">AI Chat Platform</h1>
-        {conversationId && (
-          <p className="mt-1 text-xs text-gray-400">
-            Conversation: {conversationId}
-          </p>
-        )}
+      <header className="flex items-center justify-between border-b border-gray-700 px-6 py-4">
+        <div>
+          <h1 className="text-xl font-semibold">AI Chat Platform</h1>
+          {conversationId && (
+            <p className="mt-1 text-xs text-gray-400">
+              Conversation: {conversationId}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="rounded-lg border border-gray-600
+           px-4 py-2 text-sm font-medium text-gray-300 
+           transition hover:bg-gray-700 disabled:opacity-50"
+        >
+          {isLoggingOut ? "Logging out..." : "Logout"}
+        </button>
       </header>
 
       {/* Chat Messages */}
